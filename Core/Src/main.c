@@ -38,7 +38,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define SAMPLE_FREQ			(250)
+#define SAMPLE_PERIOD		(0.004f)
+#define RAD_TO_DEG_MULT     (57.2958f)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -63,7 +65,7 @@ imu mpu9150_imu = {
 	.angle_y = 0.0f,
 };
 
-float z[2] = {0.0f};;
+float z[4] = {0.0f};;
 
 volatile uint32_t *DWT_CONTROL = (uint32_t *)0xE0001000;
 volatile uint32_t *DWT_CYCCNT = (uint32_t *)0xE0001004;
@@ -144,27 +146,31 @@ int main(void)
   {
 	  if (read_imu_flag == 1)
 	  {
-
 		  read_imu_flag = 0;
 		  mpu9150_read_gyro(&mpu9150_imu, &mpu9150_imu.gyro_x_raw);
-
 		  mpu9150_read_accel(&mpu9150_imu, &mpu9150_imu.accel_x_raw);
-
 		  mpu9150_convert_from_raw(&mpu9150_imu);
-		  start = *DWT_CYCCNT;
 
+		  /* Get pitch angle from accelerometer */
 		  temp1 = (mpu9150_imu.accel_x * mpu9150_imu.accel_x) + (mpu9150_imu.accel_z * mpu9150_imu.accel_z);
 		  arm_sqrt_f32(temp1, &temp2);
-
 		  arm_atan2_f32(mpu9150_imu.accel_y, temp2, &temp1);
+		  z[0] = temp1 * RAD_TO_DEG_MULT;
 
-		  z[0] = temp1 * 57.2958f;
+		  /* Get roll angle from accelerometer */
+		  temp1 = (mpu9150_imu.accel_y * mpu9150_imu.accel_y) + (mpu9150_imu.accel_z * mpu9150_imu.accel_z);
+		  arm_sqrt_f32(temp1, &temp2);
+		  arm_atan2_f32(-mpu9150_imu.accel_x, temp2, &temp1);
+		  z[1] = temp1 * RAD_TO_DEG_MULT;
+
+		  z[2] = mpu9150_imu.gyro_x;
+		  z[3] = mpu9150_imu.gyro_y;
+
+		  start = *DWT_CYCCNT;
+		  lkf_update(z, 4);
           stop = *DWT_CYCCNT;
           time_duration = stop-start;
 
-		  z[1] = mpu9150_imu.gyro_x;
-
-		  lkf_update(z, 2);
 
 	  }
 
