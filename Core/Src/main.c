@@ -29,6 +29,7 @@
 #include "mpu9150.h"
 #include "lkf.h"
 #include "math.h"	// TODO: temporary
+#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -101,6 +102,7 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 //  int count = 0;
+	float temp1, temp2;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -143,7 +145,6 @@ int main(void)
   {
 	  if (read_imu_flag == 1)
 	  {
-		  start = *DWT_CYCCNT;
 
 		  read_imu_flag = 0;
 		  mpu9150_read_gyro(&mpu9150_imu, &mpu9150_imu.gyro_x_raw);
@@ -151,16 +152,24 @@ int main(void)
 		  mpu9150_read_accel(&mpu9150_imu, &mpu9150_imu.accel_x_raw);
 
 		  mpu9150_convert_from_raw(&mpu9150_imu);
+		  start = *DWT_CYCCNT;
 
-		  z[0] = atan(mpu9150_imu.accel_y / sqrt(pow(mpu9150_imu.accel_x, 2) + pow(mpu9150_imu.accel_z, 2)));
-		  z[0] *= 57.2958f;
+		  temp1 = (mpu9150_imu.accel_x * mpu9150_imu.accel_x) + (mpu9150_imu.accel_z * mpu9150_imu.accel_z);
+		  arm_sqrt_f32(temp1, &temp2);
+
+		  arm_atan2_f32(mpu9150_imu.accel_y, temp2, &temp1);
+
+		  z[0] = temp1 * 57.2958f;
+          stop = *DWT_CYCCNT;
+          time_duration = stop-start;
+
+		  //z[0] = atan(mpu9150_imu.accel_y / sqrt(pow(mpu9150_imu.accel_x, 2) + pow(mpu9150_imu.accel_z, 2)));
+		  //z[0] *= 57.2958f;
 		  z[1] = mpu9150_imu.gyro_x;
 
 		  //mpu9150_get_angle(&mpu9150_imu);
 		  lkf_update(z, 2);
 
-          stop = *DWT_CYCCNT;
-          time_duration = stop-start;
 	  }
 
     /* USER CODE END WHILE */
