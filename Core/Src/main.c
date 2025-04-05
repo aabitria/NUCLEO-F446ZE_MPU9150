@@ -27,6 +27,8 @@
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
 #include "mpu9150.h"
+#include "lkf.h"
+#include "math.h"	// TODO: temporary
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +63,14 @@ imu mpu9150_imu = {
 	.angle_y = 0.0f,
 };
 
+float z[2] = {0.0f};;
+
+volatile uint32_t *DWT_CONTROL = (uint32_t *)0xE0001000;
+volatile uint32_t *DWT_CYCCNT = (uint32_t *)0xE0001004;
+volatile uint32_t *DEMCR = (uint32_t *)0xE000EDFC;
+
+
+uint32_t start, stop, time_duration;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -91,7 +101,6 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 //  int count = 0;
-	//float x, x1, x2;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -100,6 +109,11 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  *DEMCR = *DEMCR | 0x01000000;
+
+  *DWT_CYCCNT = 0;
+
+  *DWT_CONTROL = *DWT_CONTROL | 1;
 
   /* USER CODE END Init */
 
@@ -120,7 +134,7 @@ int main(void)
 
   mpu9150_calibrate(&mpu9150_imu);
 
-
+  lkf_init(0.004);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -129,6 +143,8 @@ int main(void)
   {
 	  if (read_imu_flag == 1)
 	  {
+		  start = *DWT_CYCCNT;
+
 		  read_imu_flag = 0;
 		  mpu9150_read_gyro(&mpu9150_imu, &mpu9150_imu.gyro_x_raw);
 
@@ -136,12 +152,15 @@ int main(void)
 
 		  mpu9150_convert_from_raw(&mpu9150_imu);
 
-		  mpu9150_get_angle(&mpu9150_imu);
+		  z[0] = atan(mpu9150_imu.accel_y / sqrt(pow(mpu9150_imu.accel_x, 2) + pow(mpu9150_imu.accel_z, 2)));
+		  z[0] *= 57.2958f;
+		  z[1] = mpu9150_imu.gyro_x;
 
-		  x = mpu9150_imu.angle_x;
-		  //x1 = x_gyro;
-		  //x2 = x_accel;
+		  //mpu9150_get_angle(&mpu9150_imu);
+		  lkf_update(z, 2);
 
+          stop = *DWT_CYCCNT;
+          time_duration = stop-start;
 	  }
 
     /* USER CODE END WHILE */
