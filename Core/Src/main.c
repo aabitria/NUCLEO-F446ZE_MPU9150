@@ -28,7 +28,6 @@
 #include "stdio.h"
 #include "mpu9150.h"
 #include "lkf.h"
-#include "math.h"	// TODO: temporary
 #include "arm_math.h"
 /* USER CODE END Includes */
 
@@ -163,11 +162,8 @@ int main(void)
           stop = *DWT_CYCCNT;
           time_duration = stop-start;
 
-		  //z[0] = atan(mpu9150_imu.accel_y / sqrt(pow(mpu9150_imu.accel_x, 2) + pow(mpu9150_imu.accel_z, 2)));
-		  //z[0] *= 57.2958f;
 		  z[1] = mpu9150_imu.gyro_x;
 
-		  //mpu9150_get_angle(&mpu9150_imu);
 		  lkf_update(z, 2);
 
 	  }
