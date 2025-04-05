@@ -236,7 +236,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		/* Set flag to read & update IMU data */
 		read_imu_flag = 1;
-		//count += 0.01f;
+
 		return;
 	}
 }
