@@ -102,18 +102,18 @@ static float H_[4][4] =
 
 static float Q_[4][4] =
 {
-	{0.05, 0.0, 0.0, 0.0},
-	{0.0, 0.08, 0.0, 0.0},
-	{0.0, 0.0, 0.1, 0.0},
-	{0.0, 0.0, 0.0, 0.1},
+	{0.01, 0.0, 0.0, 0.0},
+	{0.0, 0.01, 0.0, 0.0},
+	{0.0, 0.0, 0.01, 0.0},
+	{0.0, 0.0, 0.0, 0.01},
 };
 
 static float R_[4][4] =
 {
-	{3.0, 0.0, 0.0, 0.0},
-	{0.0, 4.5, 0.0, 0.0},
-	{0.0, 0.0, 5.0, 0.0},
-	{0.0, 0.0, 0.0, 5.0},
+	{10.0, 0.0, 0.0, 0.0},
+	{0.0, 10.0, 0.0, 0.0},
+	{0.0, 0.0, 10.0, 0.0},
+	{0.0, 0.0, 0.0, 10.0},
 };
 
 static float P_[4][4] =
@@ -243,8 +243,8 @@ static inline void lkf_correction (float *measured_vals, int measurement_len)
 
 	// Compute innovation vector
 	// y_ = z - H *x, but H is I, so y_ = z - x
-	//ret = arm_mat_sub_f32(&LinearKalman.z, &LinearKalman.x, &LinearKalman.y_);
-	//assert(ret == ARM_MATH_SUCCESS);
+//	ret = arm_mat_sub_f32(&LinearKalman.z, &LinearKalman.x, &LinearKalman.y_);
+//	assert(ret == ARM_MATH_SUCCESS);
 	y_[0] = z_[0] - x_[0];
 	y_[1] = z_[1] - x_[1];
 	y_[2] = z_[2] - x_[2];
@@ -280,8 +280,8 @@ static inline void lkf_correction (float *measured_vals, int measurement_len)
 	arm_mat_vec_mult_f32(&LinearKalman.K, y_, Tmp_);
 
 	// x^ = x- + temp
-	//ret = arm_mat_add_f32(&LinearKalman.x, &Temp, &LinearKalman.x);
-	//assert(ret == ARM_MATH_SUCCESS);
+//	ret = arm_mat_add_f32(&LinearKalman.x, &Tmp, &LinearKalman.x);
+//	assert(ret == ARM_MATH_SUCCESS);
 	x_[0] += Tmp_[0];
 	x_[1] += Tmp_[1];
 	x_[2] += Tmp_[2];
