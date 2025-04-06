@@ -165,7 +165,7 @@ static inline void lkf_prediction (void)
 	ret = arm_mat_mult_f32(&Temp, &Ft, &LinearKalman.P);
 	assert(ret == ARM_MATH_SUCCESS);
 
-    // P += Q
+	// P += Q
 	ret = arm_mat_add_f32(&LinearKalman.P, &LinearKalman.Q, &LinearKalman.P);
 	assert(ret == ARM_MATH_SUCCESS);
 }
@@ -202,7 +202,7 @@ static inline void lkf_correction (float *measured_vals, int measurement_len)
 	assert(ret == ARM_MATH_SUCCESS);
 
 	// K = P- * temp
-    ret = arm_mat_mult_f32(&LinearKalman.P, &Temp, &LinearKalman.K);
+	ret = arm_mat_mult_f32(&LinearKalman.P, &Temp, &LinearKalman.K);
 	assert(ret == ARM_MATH_SUCCESS);
 
 	/* Apply corrections to x- => x and P- => P */
@@ -230,7 +230,7 @@ static inline void lkf_correction (float *measured_vals, int measurement_len)
 
 void lkf_update (float *measured_vals, int measurement_len)
 {
-    assert(measurement_len == STATE_VEC_LEN);
+	assert(measurement_len == STATE_VEC_LEN);
 
 	lkf_prediction();
 
