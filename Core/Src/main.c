@@ -170,8 +170,6 @@ int main(void)
 		  lkf_update(z, 4);
           stop = *DWT_CYCCNT;
           time_duration = stop-start;
-
-
 	  }
 
     /* USER CODE END WHILE */
